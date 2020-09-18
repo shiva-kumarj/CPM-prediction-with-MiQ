@@ -1,0 +1,5 @@
+# Ignore the datasets from tracking
+data
+data.zip
+
+# Ignore the reference code
