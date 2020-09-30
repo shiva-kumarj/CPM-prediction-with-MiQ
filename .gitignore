@@ -7,6 +7,6 @@ data.zip
 11-categorical-encoders-and-benchmark-checkpoint.ipynb
 
 #Ignore directories
-code/reference_code
-code/catboost_info
+code/reference_code/*
+code/catboost_info/*
 code/*.csv
