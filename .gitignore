@@ -8,3 +8,5 @@ data.zip
 
 #Ignore directories
 code/reference_code
+code/catboost_info
+code/*.csv
