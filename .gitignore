@@ -11,3 +11,6 @@ code/reference_code/*
 code/catboost_info
 code/*.csv
 code/Hyperparameter Tuning/
+
+code/Final_test_prediction.ipynb
+code/.ipynb_checkpoints/Final_test_prediction-checkpoint.ipynb
