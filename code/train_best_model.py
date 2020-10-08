@@ -165,9 +165,9 @@ if __name__ == '__main__':
     print("Model: ", cbr_model.get_param)
 
     # Write model to disc
-    pickle.dump(cbr_model, open(r'code\output\catboostmodel_2.pkl', 'wb'))
+    pickle.dump(cbr_model, open(r'code\output\catboostmodel_1.pkl', 'wb'))
 
-    print("Trained model at : {}".format(r'code\output\catboostmodel_2.pkl'))
+    print("Trained model at : {}".format(r'code\output\catboostmodel_1.pkl'))
 
     input("press any key to exit")
 

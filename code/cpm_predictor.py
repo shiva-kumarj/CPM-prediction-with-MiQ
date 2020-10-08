@@ -15,6 +15,9 @@ from sklearn.preprocessing import OrdinalEncoder
 from sklearn.metrics import mean_absolute_error
 from tkinter import filedialog
 
+root = tk.Tk()
+root.withdraw()
+
 def read_dataset(train_path, test_path):
     # Read the train dataset as well. no need to take as user input.
     train = pd.read_csv(train_path)
@@ -117,9 +120,9 @@ def train_test_split(df, target_date, validation_date, categorical):
     # return the df_test, df_validation.
     return df_test, df_val
 
-def model_prediction(df):
+def model_prediction(df, model_path):
     # load the model (catboostmodel.pkl)
-    cbr = pickle.load(open(r'code\output\catboostmodel_1.pkl', 'rb'))
+    cbr = pickle.load(open(model_path, 'rb'))
 
     # print the MAE for train and test
     # print R2 for  train and test.
@@ -133,14 +136,15 @@ def model_prediction(df):
 
 if __name__ == '__main__':
     # take user input to the path of the test dataset.
-    root = tk.Tk()
-    root.withdraw()
+    
     
     # Select the train and test data from their respective path
     print("Select test.csv file")
     test_path = filedialog.askopenfilename()
     print("Select train.csv file")
     train_path= filedialog.askopenfilename()
+    print("Select model to use")
+    model_path = filedialog.askopenfilename()
 
     train, test, target_date, validation_date = read_dataset(train_path, test_path)
     
@@ -162,11 +166,11 @@ if __name__ == '__main__':
     # dataset splitting
     df_test, df_val = train_test_split(final_df, target_date, validation_date, categorical)
 
-    result = model_prediction(df_test)
+    result = model_prediction(df_test, model_path)
     
     # write the output dataset to csv and return path to output.
-    result.to_csv(r"code\output\prediction_2.csv", index = False)
-    print("Predictions file at output path: {}".format(r"code\output\prediction_2.csv"))
+    result.to_csv(r"code\output\prediction_1.csv", index = False)
+    print("Predictions file at output path: {}".format(r"code\output\prediction_1.csv"))
 
 
 
