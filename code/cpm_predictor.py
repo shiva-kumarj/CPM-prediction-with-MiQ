@@ -42,26 +42,14 @@ def read_dataset(train_path, test_path):
 
 
 def clean_unknowns(train, test):
-    # take both and train and test dataset as input parameter
-    # app_ids contain "Unknown" in both. Remove these entries
-
     # test set
-    unknown_app_ids = test[test['App/URL ID'] == 'Unknown'].index
-    test.drop(unknown_app_ids, inplace = True)
+    # impute  rows with unknown app_id .
+    test.loc[test[test['App/URL ID'] == 'Unknown'].index, 'App/URL ID'] = 9999
 
     # train set
-    unknown_app_ids = train[train['App/URL ID'] == 'Unknown'].index
-    train.drop(unknown_app_ids, inplace = True)
+    train.loc[train[train['App/URL ID'] == 'Unknown'].index, 'App/URL ID'] = 9999    
 
-    # Reset index
-    test.reset_index(drop = True, inplace = True)
-    train.reset_index(drop = True, inplace = True)
-
-    # Perform inplace transformation, no need to return dataframe
-    # print the shape of train and test after removing "Unknown".
-    print("Shape of train set after cleansing: {}".format(train.shape))
-    print("Shape of test set after cleansing: {}".format(test.shape))
-
+   
 def prep_dataset(train, test):
     # Concatenate train and test into one dataframe for encoding. reset_index(drop = True)
     final_df = pd.concat([train, test]).reset_index(drop = True)
@@ -95,30 +83,30 @@ def ordinal_encoding(df, categorical):
     # return the transformed df
     return df
 
+def train_test_split(target_date, df, categorical):
+    print("Target Date: {}".format(target_date))
 
-def train_test_split(df, target_date, validation_date, categorical):
-    # create df_test from the target_date
-    print("Test Date: ", target_date)
-    print("Validation Date: ", validation_date)
-
+    # Take test date to make test dataset.
     df_test = df[df['date'] == target_date].copy()
-  
-    # create validation dataset frm train data.
-    df_val = df[df['date'] == validation_date].copy()
-    
-    # drop "date" and "cpm".
-    df_test.drop(['cpm', 'date'], inplace = True, axis = 1)
-    df_val.drop(['date', 'cpm'], axis = 1, inplace = True)
+    test_indices = list(df_test.index)
 
-    print("Shape of validation set: {}".format(df_val.shape))
-    print("Shape of test set: {}".format(df_test.shape))
+    # Take train date make into train.
+    df_train = df.drop(test_indices)
+    y_train = df_train['cpm']
+    df_train.drop(['date', 'cpm'], inplace = True, axis = 1)
 
-    # Convert values to integer
+    #y_val = df_val['cpm']
+    #df_val.drop(['date', 'cpm'], inplace = True, axis = 1)
+
+    df_test.drop(['date', 'cpm'], axis = 1, inplace = True)
+
+    df_train[categorical] = df_train[categorical].apply(pd.to_numeric, downcast = 'integer')
+    #df_val[categorical] = df_val[categorical].apply(pd.to_numeric, downcast = 'integer')
     df_test[categorical] = df_test[categorical].apply(pd.to_numeric, downcast = 'integer')
-    df_val[categorical] = df_val[categorical].apply(pd.to_numeric, downcast = 'integer')
-    
-    # return the df_test, df_validation.
-    return df_test, df_val
+
+    # return test_df, train_df, validation_df, y_train, y_val
+    #return df_train, y_train, df_val, y_val, df_test
+    return df_train, y_train, df_test
 
 def model_prediction(df, model_path):
     # load the model (catboostmodel.pkl)
@@ -136,8 +124,6 @@ def model_prediction(df, model_path):
 
 if __name__ == '__main__':
     # take user input to the path of the test dataset.
-    
-    
     # Select the train and test data from their respective path
     print("Select test.csv file")
     test_path = filedialog.askopenfilename()
@@ -145,11 +131,16 @@ if __name__ == '__main__':
     train_path= filedialog.askopenfilename()
     print("Select model to use")
     model_path = filedialog.askopenfilename()
+    print("Select the output file path")
+    output_file = filedialog.asksaveasfilename()
 
     train, test, target_date, validation_date = read_dataset(train_path, test_path)
     
     # clean the "unknowns" present in train and test set
     clean_unknowns(train, test)
+    print("Shape of train set after cleansing: {}".format(train.shape))
+    print("Shape of test set after cleansing: {}".format(test.shape))
+
 
     # Prep dataset for encoding,
     # rename columns, fillna  etc
@@ -164,13 +155,13 @@ if __name__ == '__main__':
     final_df = ordinal_encoding(final_df, categorical)
     
     # dataset splitting
-    df_test, df_val = train_test_split(final_df, target_date, validation_date, categorical)
+    df_train, y_train, df_test = train_test_split(target_date, final_df, categorical)
 
     result = model_prediction(df_test, model_path)
     
     # write the output dataset to csv and return path to output.
-    result.to_csv(r"code\output\prediction_1.csv", index = False)
-    print("Predictions file at output path: {}".format(r"code\output\prediction_1.csv"))
+    result.to_csv(output_file, index = False)
+    print("Predictions file at output path: {}".format(output_file))
 
 
 
